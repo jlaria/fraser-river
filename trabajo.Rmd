@@ -1,0 +1,203 @@
+---
+title: "Predicción de catástrofes en Fraser River"
+output:
+  html_document: 
+    code_folding: hide 
+    toc: true
+    toc_float: true
+bibliography: refs.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, fig.width = 5, fig.height = 5)
+```
+
+## Motivación
+
+Se tiene información sobre el nivel medio mensual del río Fraser, en Canadá, desde Marzo de 1913 hasta Diciembre de 1990. Se pide estimar la probabilidad de que el río desborde superando los 10000 $m^3/s$.
+
+## Datos
+
+Los datos utilizados están disponibles en <http://lib.stat.cmu.edu/datasets/fraser-river>. Se tienen $946$ observaciones de una variable (nivel medio mensual).
+
+```{r}
+river <- read.table('fraser-river.txt'); head(river)
+```
+
+## Modelo
+
+En este trabajo se considerará que las observaciones provienen de un modelo PAR (Periodic AutoRegresive), como sugiere @mcleod1994diagnostic.
+
+La periodicidad de la serie puede observarse en la siguiente figura. Note que, naturalmente, el período de la serie es 12.
+
+```{r}
+ts.plot(river[1:100,], ylab='Nivel del río', xlab='Meses')
+```
+
+Es posible considerar también una tendencia a lo largo de los años, pero en este caso no parece haber tal relación.
+
+En este caso, un gráfico ACF es muy informativo, pues permite estimar el orden de la dependencia entre los meses consecutivos.
+
+```{r}
+acf(river)
+```
+
+Todas las correlaciones entre meses son significativas. Aunque pudiese tratarse el problema analizando todas estas dependencias para cada mes, el modelo resultante sería demasiado complicado y posiblemente asociado a pobres estimaciones de los parámetros. Es lógico suponer que dada una fecha, el nivel del río ese mes dependerá de dos componentes: el nivel del río observado en el mes anterior y el nivel medio histórico del río ese mes. Se formulará este problema como sigue,
+
+$$ y_t = \phi_{0s} + \phi_{1s} y_{t-1} + \varphi_{s}\epsilon_t, \quad \epsilon_t \sim N(0,1), $$ donde $s=1,2 \ldots 12$, $t=1,2 \ldots n$. Los parámetros $\phi_{0s}$ controlan el nivel medio del río en cada mes según el hitórico, mientras que $\phi_{1s}$ determina la tendencia para cada año. Es lógico suponer que la varianza $\varphi_s$ varía según el mes. Por ejemplo, el mes de Marzo suele ser poco lluvioso siempre, mientras que otros meses como Mayo pueden ser lluviosos o no. 
+
+El modelo jerárquico queda,
+
+1. $Y_{t} \big|\{ \phi_{0s}, \phi_{1s}, \varphi_s, Y_{t-1} \} \sim Normal(\phi_{0s} + \phi_{1s} Y_{t-1}, \varphi_s)$,
+2. $\phi_{0s}\sim Normal(\mu, \sigma^2)$,
+3. $\phi_{1s}\sim Normal(\mu, \sigma^2)$,
+4. $\varphi_{s}\sim InvGamma(\alpha, \beta)$.
+
+## Implementación
+
+Para estimar los parámetros del modelo se ha utilizado la librería `rstan` de `R`. 
+
+Se ha aplicado previamente a los datos una transformación logarítmica. Esto se sugiere en @mcleod1994diagnostic, cuando se tienen datos reales, con el fin de estabilizar la varianza.
+
+```{r}
+# Centramos los datos para que las observaciones comiencen en el mes de enero.
+flow <- log(c(as(river[-(1:10),],'double'),as(river[(1:10),],'double')))
+
+library(refund)
+library(refund.shiny)
+library(tidyverse)
+river.flow <- matrix(flow[1:936], ncol= 12, byrow = T)
+as_refundObj(river.flow) %>%
+  ggplot(aes(x = index, y = value, group = id)) + geom_path(alpha = .2)
+```
+
+
+
+Para estimar la probabilidad de que el río desborde simularemos muchas observaciones de la serie. La probabilidad de que el río desborde será estimada a través de la proporción de veces que el nivel medio ha sobrepasado el límite en las series simuladas.
+
+
+
+El código del programa en Stan para el modelo considerado sería como sigue.
+```{r}
+programa<-'
+data{
+  // Datos externos
+  int<lower=1> N; // Tamaño de la serie
+  int<lower=1> N_new; // Tamaño de la serie a predecir
+  real<lower=0> y[N]; // Serie observada
+  real jan_new; // Valor (fijo) del mes de Enero de la serie a predecir  
+  real mu; 
+  real<lower=0> sigma; 
+  real<lower=0> alpha;
+  real<lower=0> beta;
+}
+parameters{
+    // Parámetros a estimar
+    real phi0[12]; // Nivel histórico medio mensual
+    real phi1[12]; // Pendiente cada mes y el siguiente
+    real<lower=0> varphi2[12]; // Varianza del nivel medio por mes
+}
+transformed parameters{
+  // Transformaciones para notación
+  real<lower=0> varphi[12];
+  for(s in 1:12){
+    varphi[s]=sqrt(varphi2[s]);
+  }
+}
+model{
+  // Formulación del modelo
+  int season;
+  season = 2;
+  for(i in 2:N){
+    y[i] ~ normal( phi0[season]+phi1[season]*y[i-1], varphi[season] );
+    season=season+1;
+    if(season>12){
+      season=1;
+    }
+  }
+  
+  for (s in 1:12){
+    phi0[s] ~ normal( mu, sigma ); // densidad a-priori normal
+    phi1[s] ~ normal( mu, sigma );
+    varphi2[s] ~ inv_gamma( alpha, beta ); // densidad a-priori inversa gamma
+  }
+}
+generated quantities{
+  // Valores simulados para estimar
+
+  vector[N_new] y_new;
+  int season;
+  season = 2;
+
+  y_new[1]=jan_new;
+
+  for(i in 2:N_new){
+    y_new[i] = normal_rng( phi0[season]+phi1[season]*y_new[i-1], varphi[season] );
+    season=season+1;
+    if(season>12){
+      season=1;
+    }
+  }
+}
+'
+```
+
+Compilamos el código de Stan.
+```{r}
+library(rstan)
+rstan_options(auto_write=T)
+options(mc.cores=parallel::detectCores()-1)
+
+programa_c<-stan_model(model_code=programa)
+```
+
+Preparamos los parámetros del modelo. 
+```{r}
+N <- length(flow) 
+N_new <- 144
+jan_new <- flow[1]
+alpha <- 0.5
+beta <- 0.5
+mu <- 3
+sigma <- 100
+datos <- list(y=flow, N=N, N_new=N_new, jan_new=jan_new, mu=mu, sigma=sigma, beta=beta, alpha=alpha)
+```
+
+Note que se ha considerado una *a priori* poco informativa para la media mensual del nivel del río y la pendiente entre meses consecutivos, pues se tiene una muestra de datos suficientemente grande para estimar estos parámetros. Para la varianza del nivel medio mensual también se ha considerado una *a-priori* poco informativa, equivalente a una observación con varianza $1$. 
+
+Simulamos del modelo de Stan.
+```{r, message=FALSE}
+result <- sampling(programa_c, data=datos, iter=1500, chains=1)
+```
+
+Extraemos los resultados del modelo.
+```{r}
+result.sim <- rstan::extract(result)
+# Número medio de desbordamientos en la simulación.
+mean(result.sim$y_new[,]>log(10000))
+```
+
+Podemos observar las trayectorias simuladas.
+```{r}
+river.flow <- matrix(t(result.sim$y_new[sample(1:500, 30),13:144]), ncol= 12, byrow = T)
+as_refundObj(river.flow) %>%
+  ggplot(aes(x = index, y = value, group = id)) + geom_path(alpha = .1)
+
+```
+
+Podemos visualizar la función de densidad marginal del nivel medio del río en cierto mes.
+
+```{r}
+dat <- data.frame(river.flow) 
+names(dat)<-month.name
+
+plot.datos<-data.frame(Month=rep(c('Abril','Mayo'), each=nrow(dat)), River=c(dat$April, dat$May))
+
+ggplot(plot.datos, aes(x=River, fill=Month, colour=Month))+geom_density(alpha=0.3)
+```
+
+Como se observa en la figura anterior, el modelo estimado capta la diferencia en el régimen de lluvias entre los meses de Abril y Mayo.
+
+## Resultados
+
+

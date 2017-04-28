@@ -1,0 +1,12 @@
+name: "fraser-river"
+output_dir: "."
+navbar:
+  title: "Trabajo Final Estadística Bayesiana"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Report"
+      href: trabajo.html
+output:
+  html_document:
+    theme: flatly
