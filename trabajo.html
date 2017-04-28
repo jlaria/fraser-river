@@ -15,32 +15,60 @@
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
-<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
-<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
-<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
 <script src="site_libs/navigation-1.1/codefolding.js"></script>
-<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
+
 
 <style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+div.sourceCode {
+  overflow-x: visible;
+}
+</style>
 <style type="text/css">
   pre:not([class]) {
     background-color: white;
   }
 </style>
-<script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
-}
-</script>
-
 
 
 <style type="text/css">
@@ -101,34 +129,34 @@ button.code-folding-btn:focus {
 <style type="text/css">
 /* padding for bootstrap navbar */
 body {
-  padding-top: 60px;
+  padding-top: 51px;
   padding-bottom: 40px;
 }
 /* offset scroll position for anchor links (for fixed navbar)  */
 .section h1 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 
 .section h2 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h3 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h4 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h5 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h6 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 </style>
 
@@ -171,101 +199,6 @@ $(document).ready(function () {
 </script>
 
 
-
-
-<script>
-$(document).ready(function ()  {
-
-    // move toc-ignore selectors from section div to header
-    $('div.section.toc-ignore')
-        .removeClass('toc-ignore')
-        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
-
-    // establish options
-    var options = {
-      selectors: "h1,h2,h3",
-      theme: "bootstrap3",
-      context: '.toc-content',
-      hashGenerator: function (text) {
-        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_').toLowerCase();
-      },
-      ignoreSelector: ".toc-ignore",
-      scrollTo: 0
-    };
-    options.showAndHide = true;
-    options.smoothScroll = true;
-
-    // tocify
-    var toc = $("#TOC").tocify(options).data("toc-tocify");
-});
-</script>
-
-<style type="text/css">
-
-#TOC {
-  margin: 25px 0px 20px 0px;
-}
-@media (max-width: 768px) {
-#TOC {
-  position: relative;
-  width: 100%;
-}
-}
-
-
-.toc-content {
-  padding-left: 30px;
-  padding-right: 40px;
-}
-
-div.main-container {
-  max-width: 1200px;
-}
-
-div.tocify {
-  width: 20%;
-  max-width: 260px;
-  max-height: 85%;
-}
-
-@media (min-width: 768px) and (max-width: 991px) {
-  div.tocify {
-    width: 25%;
-  }
-}
-
-@media (max-width: 767px) {
-  div.tocify {
-    width: 100%;
-    max-width: none;
-  }
-}
-
-.tocify ul, .tocify li {
-  line-height: 20px;
-}
-
-.tocify-subheader .tocify-item {
-  font-size: 0.90em;
-  padding-left: 25px;
-  text-indent: 0;
-}
-
-.tocify .list-group-item {
-  border-radius: 0px;
-}
-
-
-</style>
-
-<!-- setup 3col/9col grid for toc_float and main content  -->
-<div class="row-fluid">
-<div class="col-xs-12 col-sm-4 col-md-3">
-<div id="TOC" class="tocify">
-</div>
-</div>
-
-<div class="toc-content col-xs-12 col-sm-8 col-md-9">
 
 
 
@@ -312,6 +245,16 @@ div.tocify {
 
 </div>
 
+<div id="TOC">
+<ul>
+<li><a href="#motivacion">Motivación</a></li>
+<li><a href="#datos">Datos</a></li>
+<li><a href="#modelo">Modelo</a></li>
+<li><a href="#implementacion">Implementación</a></li>
+<li><a href="#diagnosticos">Diagnósticos</a></li>
+<li><a href="#resultados">Resultados</a></li>
+</ul>
+</div>
 
 <div id="motivacion" class="section level2">
 <h2>Motivación</h2>
@@ -320,7 +263,7 @@ div.tocify {
 <div id="datos" class="section level2">
 <h2>Datos</h2>
 <p>Los datos utilizados están disponibles en <a href="http://lib.stat.cmu.edu/datasets/fraser-river" class="uri">http://lib.stat.cmu.edu/datasets/fraser-river</a>. Se tienen <span class="math inline">\(946\)</span> observaciones de una variable (nivel medio mensual).</p>
-<pre class="r"><code>river &lt;- read.table(&#39;fraser-river.txt&#39;); head(river)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">river &lt;-<span class="st"> </span><span class="kw">read.table</span>(<span class="st">&#39;fraser-river.txt&#39;</span>); <span class="kw">head</span>(river)</code></pre></div>
 <pre><code>##     V1
 ## 1  485
 ## 2 1150
@@ -333,138 +276,120 @@ div.tocify {
 <h2>Modelo</h2>
 <p>En este trabajo se considerará que las observaciones provienen de un modelo PAR (Periodic AutoRegresive), como sugiere <span class="citation">McLeod (1994)</span>.</p>
 <p>La periodicidad de la serie puede observarse en la siguiente figura. Note que, naturalmente, el período de la serie es 12.</p>
-<pre class="r"><code>ts.plot(river[1:100,], ylab=&#39;Nivel del río&#39;, xlab=&#39;Meses&#39;)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">ts.plot</span>(river[<span class="dv">1</span>:<span class="dv">100</span>,], <span class="dt">ylab=</span><span class="st">&#39;Nivel del río&#39;</span>, <span class="dt">xlab=</span><span class="st">&#39;Meses&#39;</span>)</code></pre></div>
 <p><img src="trabajo_files/figure-html/unnamed-chunk-2-1.png" width="480" /></p>
 <p>Es posible considerar también una tendencia a lo largo de los años, pero en este caso no parece haber tal relación.</p>
 <p>En este caso, un gráfico ACF es muy informativo, pues permite estimar el orden de la dependencia entre los meses consecutivos.</p>
-<pre class="r"><code>acf(river)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">acf</span>(river)</code></pre></div>
 <p><img src="trabajo_files/figure-html/unnamed-chunk-3-1.png" width="480" /></p>
 <p>Todas las correlaciones entre meses son significativas. Aunque pudiese tratarse el problema analizando todas estas dependencias para cada mes, el modelo resultante sería demasiado complicado y posiblemente asociado a pobres estimaciones de los parámetros. Es lógico suponer que dada una fecha, el nivel del río ese mes dependerá de dos componentes: el nivel del río observado en el mes anterior y el nivel medio histórico del río ese mes. Se formulará este problema como sigue,</p>
 <p><span class="math display">\[ y_t = \phi_{0s} + \phi_{1s} y_{t-1} + \varphi_{s}\epsilon_t, \quad \epsilon_t \sim N(0,1), \]</span> donde <span class="math inline">\(s=1,2 \ldots 12\)</span>, <span class="math inline">\(t=1,2 \ldots n\)</span>. Los parámetros <span class="math inline">\(\phi_{0s}\)</span> controlan el nivel medio del río en cada mes según el hitórico, mientras que <span class="math inline">\(\phi_{1s}\)</span> determina la tendencia para cada año. Es lógico suponer que la varianza <span class="math inline">\(\varphi_s\)</span> varía según el mes. Por ejemplo, el mes de Marzo suele ser poco lluvioso siempre, mientras que otros meses como Mayo pueden ser lluviosos o no.</p>
 <p>El modelo jerárquico queda,</p>
 <ol style="list-style-type: decimal">
 <li><span class="math inline">\(Y_{t} \big|\{ \phi_{0s}, \phi_{1s}, \varphi_s, Y_{t-1} \} \sim Normal(\phi_{0s} + \phi_{1s} Y_{t-1}, \varphi_s)\)</span>,</li>
-<li><span class="math inline">\(\phi_{0s}\sim Normal(\mu, \sigma^2)\)</span>,</li>
-<li><span class="math inline">\(\phi_{1s}\sim Normal(\mu, \sigma^2)\)</span>,</li>
+<li><span class="math inline">\(\phi_{0s}\sim Normal(\mu_0, \sigma_0^2)\)</span>,</li>
+<li><span class="math inline">\(\phi_{1s}\sim Normal(\mu_1, \sigma_1^2)\)</span>,</li>
 <li><span class="math inline">\(\varphi_{s}\sim InvGamma(\alpha, \beta)\)</span>.</li>
 </ol>
 </div>
 <div id="implementacion" class="section level2">
 <h2>Implementación</h2>
 <p>Para estimar los parámetros del modelo se ha utilizado la librería <code>rstan</code> de <code>R</code>.</p>
-<p>Se ha aplicado previamente a los datos una transformación logarítmica. Esto se sugiere en <span class="citation">McLeod (1994)</span>, cuando se tienen datos reales, con el fin de estabilizar la varianza.</p>
-<pre class="r"><code># Centramos los datos para que las observaciones comiencen en el mes de enero.
-flow &lt;- log(c(as(river[-(1:10),],&#39;double&#39;),as(river[(1:10),],&#39;double&#39;)))
+<p>Se ha aplicado previamente a los datos una transformación logarítmica. Esto lo sugiere <span class="citation">McLeod (1994)</span>, cuando se tienen datos reales, con el fin de estabilizar la varianza.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Centramos los datos para que las observaciones comiencen en el mes de enero.</span>
+flow &lt;-<span class="st"> </span><span class="kw">log</span>(<span class="kw">c</span>(<span class="kw">as</span>(river[-(<span class="dv">1</span>:<span class="dv">10</span>),],<span class="st">&#39;double&#39;</span>),<span class="kw">as</span>(river[(<span class="dv">1</span>:<span class="dv">10</span>),],<span class="st">&#39;double&#39;</span>)))
 
-library(refund)
-library(refund.shiny)
-library(tidyverse)</code></pre>
-<pre><code>## Loading tidyverse: ggplot2
-## Loading tidyverse: tibble
-## Loading tidyverse: tidyr
-## Loading tidyverse: readr
-## Loading tidyverse: purrr
-## Loading tidyverse: dplyr</code></pre>
-<pre><code>## Conflicts with tidy packages ----------------------------------------------</code></pre>
-<pre><code>## filter(): dplyr, stats
-## lag():    dplyr, stats</code></pre>
-<pre class="r"><code>river.flow &lt;- matrix(flow[1:936], ncol= 12, byrow = T)
-as_refundObj(river.flow) %&gt;%
-  ggplot(aes(x = index, y = value, group = id)) + geom_path(alpha = .2)</code></pre>
+<span class="kw">library</span>(refund)
+<span class="kw">library</span>(refund.shiny)
+<span class="kw">library</span>(tidyverse)
+river.flow &lt;-<span class="st"> </span><span class="kw">matrix</span>(flow[<span class="dv">1</span>:<span class="dv">936</span>], <span class="dt">ncol=</span> <span class="dv">12</span>, <span class="dt">byrow =</span> T)
+<span class="kw">as_refundObj</span>(river.flow) %&gt;%
+<span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> index, <span class="dt">y =</span> value, <span class="dt">group =</span> id)) +<span class="st"> </span><span class="kw">geom_path</span>(<span class="dt">alpha =</span> .<span class="dv">2</span>)</code></pre></div>
 <p><img src="trabajo_files/figure-html/unnamed-chunk-4-1.png" width="480" /></p>
 <p>Para estimar la probabilidad de que el río desborde simularemos muchas observaciones de la serie. La probabilidad de que el río desborde será estimada a través de la proporción de veces que el nivel medio ha sobrepasado el límite en las series simuladas.</p>
 <p>El código del programa en Stan para el modelo considerado sería como sigue.</p>
-<pre class="r"><code>programa&lt;-&#39;
-data{
-  // Datos externos
-  int&lt;lower=1&gt; N; // Tamaño de la serie
-  int&lt;lower=1&gt; N_new; // Tamaño de la serie a predecir
-  real&lt;lower=0&gt; y[N]; // Serie observada
-  real jan_new; // Valor (fijo) del mes de Enero de la serie a predecir  
-  real mu; 
-  real&lt;lower=0&gt; sigma; 
-  real&lt;lower=0&gt; alpha;
-  real&lt;lower=0&gt; beta;
-}
-parameters{
-    // Parámetros a estimar
-    real phi0[12]; // Nivel histórico medio mensual
-    real phi1[12]; // Pendiente cada mes y el siguiente
-    real&lt;lower=0&gt; varphi2[12]; // Varianza del nivel medio por mes
-}
-transformed parameters{
-  // Transformaciones para notación
-  real&lt;lower=0&gt; varphi[12];
-  for(s in 1:12){
-    varphi[s]=sqrt(varphi2[s]);
-  }
-}
-model{
-  // Formulación del modelo
-  int season;
-  season = 2;
-  for(i in 2:N){
-    y[i] ~ normal( phi0[season]+phi1[season]*y[i-1], varphi[season] );
-    season=season+1;
-    if(season&gt;12){
-      season=1;
-    }
-  }
-  
-  for (s in 1:12){
-    phi0[s] ~ normal( mu, sigma ); // densidad a-priori normal
-    phi1[s] ~ normal( mu, sigma );
-    varphi2[s] ~ inv_gamma( alpha, beta ); // densidad a-priori inversa gamma
-  }
-}
-generated quantities{
-  // Valores simulados para estimar
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">programa&lt;-<span class="st">&#39; </span>
+<span class="st">data{</span>
+<span class="st">  // Datos externos</span>
+<span class="st">  int&lt;lower=1&gt; N; // Tamaño de la serie</span>
+<span class="st">  int&lt;lower=1&gt; N_new; // Tamaño de la serie a predecir</span>
+<span class="st">  real&lt;lower=0&gt; y[N]; // Serie observada</span>
+<span class="st">  real jan_new; // Valor (fijo) del mes de Enero de la serie a predecir  </span>
+<span class="st">  real mu0; </span>
+<span class="st">  real&lt;lower=0&gt; sigma0; </span>
+<span class="st">  real mu1; </span>
+<span class="st">  real&lt;lower=0&gt; sigma1;</span>
+<span class="st">  real&lt;lower=0&gt; alpha;</span>
+<span class="st">  real&lt;lower=0&gt; beta;</span>
+<span class="st">}</span>
+<span class="st">parameters{</span>
+<span class="st">    // Parámetros a estimar</span>
+<span class="st">    real phi0[12]; // Nivel histórico medio mensual</span>
+<span class="st">    real phi1[12]; // Pendiente cada mes y el siguiente</span>
+<span class="st">    real&lt;lower=0&gt; varphi2[12]; // Varianza del nivel medio por mes</span>
+<span class="st">}</span>
+<span class="st">transformed parameters{</span>
+<span class="st">  // Transformaciones para notación</span>
+<span class="st">  real&lt;lower=0&gt; varphi[12];</span>
+<span class="st">  for(s in 1:12){</span>
+<span class="st">    varphi[s]=sqrt(varphi2[s]);</span>
+<span class="st">  }</span>
+<span class="st">}</span>
+<span class="st">model{</span>
+<span class="st">  // Formulación del modelo</span>
+<span class="st">  int season;</span>
+<span class="st">  season = 2;</span>
+<span class="st">  for(i in 2:N){</span>
+<span class="st">    y[i] ~ normal( phi0[season]+phi1[season]*y[i-1], varphi[season] );</span>
+<span class="st">    season=season+1;</span>
+<span class="st">    if(season&gt;12){</span>
+<span class="st">      season=1;</span>
+<span class="st">    }</span>
+<span class="st">  }</span>
+<span class="st">  </span>
+<span class="st">  for (s in 1:12){</span>
+<span class="st">    phi0[s] ~ normal( mu0, sigma0 ); // densidad a-priori normal</span>
+<span class="st">    phi1[s] ~ normal( mu1, sigma1 );</span>
+<span class="st">    varphi2[s] ~ inv_gamma( alpha, beta ); // densidad a-priori inversa gamma</span>
+<span class="st">  }</span>
+<span class="st">}</span>
+<span class="st">generated quantities{</span>
+<span class="st">  // Valores simulados para estimar</span>
 
-  vector[N_new] y_new;
-  int season;
-  season = 2;
+<span class="st">  vector[N_new] y_new;</span>
+<span class="st">  int season;</span>
+<span class="st">  season = 2;</span>
 
-  y_new[1]=jan_new;
+<span class="st">  y_new[1]=jan_new;</span>
 
-  for(i in 2:N_new){
-    y_new[i] = normal_rng( phi0[season]+phi1[season]*y_new[i-1], varphi[season] );
-    season=season+1;
-    if(season&gt;12){
-      season=1;
-    }
-  }
-}
-&#39;</code></pre>
+<span class="st">  for(i in 2:N_new){</span>
+<span class="st">    y_new[i] = normal_rng( phi0[season]+phi1[season]*y_new[i-1], varphi[season] );</span>
+<span class="st">    season=season+1;</span>
+<span class="st">    if(season&gt;12){</span>
+<span class="st">      season=1;</span>
+<span class="st">    }</span>
+<span class="st">  }</span>
+<span class="st">}</span>
+<span class="st">&#39;</span></code></pre></div>
 <p>Compilamos el código de Stan.</p>
-<pre class="r"><code>library(rstan)</code></pre>
-<pre><code>## Loading required package: StanHeaders</code></pre>
-<pre><code>## rstan (Version 2.14.1, packaged: 2016-12-28 14:55:41 UTC, GitRev: 5fa1e80eb817)</code></pre>
-<pre><code>## For execution on a local, multicore CPU with excess RAM we recommend calling
-## rstan_options(auto_write = TRUE)
-## options(mc.cores = parallel::detectCores())</code></pre>
-<pre><code>## 
-## Attaching package: &#39;rstan&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:tidyr&#39;:
-## 
-##     extract</code></pre>
-<pre class="r"><code>rstan_options(auto_write=T)
-options(mc.cores=parallel::detectCores()-1)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(rstan)
+<span class="kw">rstan_options</span>(<span class="dt">auto_write=</span>T) 
+<span class="kw">options</span>(<span class="dt">mc.cores=</span>parallel::<span class="kw">detectCores</span>()-<span class="dv">1</span>)
 
-programa_c&lt;-stan_model(model_code=programa)</code></pre>
+programa_c&lt;-<span class="kw">stan_model</span>(<span class="dt">model_code=</span>programa)</code></pre></div>
 <p>Preparamos los parámetros del modelo.</p>
-<pre class="r"><code>N &lt;- length(flow) 
-N_new &lt;- 144
-jan_new &lt;- flow[1]
-alpha &lt;- 0.5
-beta &lt;- 0.5
-mu &lt;- 3
-sigma &lt;- 100
-datos &lt;- list(y=flow, N=N, N_new=N_new, jan_new=jan_new, mu=mu, sigma=sigma, beta=beta, alpha=alpha)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">N &lt;-<span class="st"> </span><span class="kw">length</span>(flow) 
+N_new &lt;-<span class="st"> </span><span class="dv">144</span>
+jan_new &lt;-<span class="st"> </span>flow[<span class="dv">1</span>]
+alpha &lt;-<span class="st"> </span><span class="fl">0.5</span> -&gt;<span class="st"> </span>beta
+mu0 &lt;-<span class="st"> </span><span class="dv">3</span> -&gt;<span class="st"> </span>mu1 
+sigma0 &lt;-<span class="st"> </span><span class="dv">100</span> -&gt;<span class="st"> </span>sigma1
+datos &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">y=</span>flow, <span class="dt">N=</span>N, <span class="dt">N_new=</span>N_new, <span class="dt">jan_new=</span>jan_new, <span class="dt">mu0=</span>mu0, <span class="dt">sigma0=</span>sigma0, <span class="dt">mu1=</span>mu1, <span class="dt">sigma1=</span>sigma1, <span class="dt">beta=</span>beta, <span class="dt">alpha=</span>alpha)</code></pre></div>
 <p>Note que se ha considerado una <em>a priori</em> poco informativa para la media mensual del nivel del río y la pendiente entre meses consecutivos, pues se tiene una muestra de datos suficientemente grande para estimar estos parámetros. Para la varianza del nivel medio mensual también se ha considerado una <em>a-priori</em> poco informativa, equivalente a una observación con varianza <span class="math inline">\(1\)</span>.</p>
 <p>Simulamos del modelo de Stan.</p>
-<pre class="r"><code>result &lt;- sampling(programa_c, data=datos, iter=1500, chains=1)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">result &lt;-<span class="st"> </span><span class="kw">sampling</span>(programa_c, <span class="dt">data=</span>datos, <span class="dt">iter=</span><span class="dv">1500</span>, <span class="dt">chains=</span><span class="dv">1</span>)  </code></pre></div>
 <pre><code>## 
-## SAMPLING FOR MODEL &#39;0b66fe4f96586d41e76dcf5c9d9f2fee&#39; NOW (CHAIN 1).
+## SAMPLING FOR MODEL &#39;e0a890719b9a137e9154bb20c7a5cf8d&#39; NOW (CHAIN 1).
 ## 
 ## Chain 1, Iteration:    1 / 1500 [  0%]  (Warmup)
 ## Chain 1, Iteration:  150 / 1500 [ 10%]  (Warmup)
@@ -478,31 +403,40 @@ datos &lt;- list(y=flow, N=N, N_new=N_new, jan_new=jan_new, mu=mu, sigma=sigma, 
 ## Chain 1, Iteration: 1200 / 1500 [ 80%]  (Sampling)
 ## Chain 1, Iteration: 1350 / 1500 [ 90%]  (Sampling)
 ## Chain 1, Iteration: 1500 / 1500 [100%]  (Sampling)
-##  Elapsed Time: 54.067 seconds (Warm-up)
-##                45.9757 seconds (Sampling)
-##                100.043 seconds (Total)</code></pre>
+##  Elapsed Time: 54.791 seconds (Warm-up)
+##                55.1692 seconds (Sampling)
+##                109.96 seconds (Total)</code></pre>
 <p>Extraemos los resultados del modelo.</p>
-<pre class="r"><code>result.sim &lt;- rstan::extract(result)
-# Número medio de desbordamientos en la simulación.
-mean(result.sim$y_new[,]&gt;log(10000))</code></pre>
-<pre><code>## [1] 0.005555556</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">result.sim &lt;-<span class="st"> </span>rstan::<span class="kw">extract</span>(result) 
+<span class="co"># Número medio de desbordamientos en la simulación. </span>
+<span class="kw">mean</span>(result.sim$y_new[,]&gt;<span class="kw">log</span>(<span class="dv">10000</span>)) </code></pre></div>
+<pre><code>## [1] 0.005333333</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">mean</span>(result.sim$y_new[,<span class="dv">12</span>*(<span class="dv">2</span>:<span class="dv">11</span>)+<span class="dv">6</span>]&gt;<span class="kw">log</span>(<span class="dv">10000</span>)) </code></pre></div>
+<pre><code>## [1] 0.0464</code></pre>
 <p>Podemos observar las trayectorias simuladas.</p>
-<pre class="r"><code>river.flow &lt;- matrix(t(result.sim$y_new[sample(1:500, 30),13:144]), ncol= 12, byrow = T)
-as_refundObj(river.flow) %&gt;%
-  ggplot(aes(x = index, y = value, group = id)) + geom_path(alpha = .1)</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">river.flow &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">t</span>(result.sim$y_new[<span class="kw">sample</span>(<span class="dv">1</span>:<span class="dv">500</span>, <span class="dv">30</span>),<span class="dv">13</span>:<span class="dv">144</span>]), <span class="dt">ncol=</span> <span class="dv">12</span>, <span class="dt">byrow =</span> T)
+<span class="kw">as_refundObj</span>(river.flow) %&gt;%
+<span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> index, <span class="dt">y =</span> value, <span class="dt">group =</span> id)) +<span class="st"> </span><span class="kw">geom_path</span>(<span class="dt">alpha =</span> .<span class="dv">1</span>) </code></pre></div>
 <p><img src="trabajo_files/figure-html/unnamed-chunk-10-1.png" width="480" /></p>
 <p>Podemos visualizar la función de densidad marginal del nivel medio del río en cierto mes.</p>
-<pre class="r"><code>dat &lt;- data.frame(river.flow) 
-names(dat)&lt;-month.name
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">dat &lt;-<span class="st"> </span><span class="kw">data.frame</span>(river.flow)  
+<span class="kw">names</span>(dat)&lt;-month.name
 
-plot.datos&lt;-data.frame(Month=rep(c(&#39;Abril&#39;,&#39;Mayo&#39;), each=nrow(dat)), River=c(dat$April, dat$May))
+plot.datos&lt;-<span class="kw">data.frame</span>(<span class="dt">Month=</span><span class="kw">rep</span>(<span class="kw">c</span>(<span class="st">&#39;Abril&#39;</span>,<span class="st">&#39;Mayo&#39;</span>), <span class="dt">each=</span><span class="kw">nrow</span>(dat)), <span class="dt">River=</span><span class="kw">c</span>(dat$April, dat$May))
 
-ggplot(plot.datos, aes(x=River, fill=Month, colour=Month))+geom_density(alpha=0.3)</code></pre>
+<span class="kw">ggplot</span>(plot.datos, <span class="kw">aes</span>(<span class="dt">x=</span>River, <span class="dt">fill=</span>Month, <span class="dt">colour=</span>Month))+<span class="kw">geom_density</span>(<span class="dt">alpha=</span><span class="fl">0.3</span>)</code></pre></div>
 <p><img src="trabajo_files/figure-html/unnamed-chunk-11-1.png" width="480" /></p>
 <p>Como se observa en la figura anterior, el modelo estimado capta la diferencia en el régimen de lluvias entre los meses de Abril y Mayo.</p>
 </div>
-<div id="resultados" class="section level2 unnumbered">
+<div id="diagnosticos" class="section level2">
+<h2>Diagnósticos</h2>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">traceplot</span>(result, <span class="dt">pars=</span><span class="st">&quot;phi0[1]&quot;</span>, <span class="dt">inc_warmup=</span><span class="ot">TRUE</span>)</code></pre></div>
+<p><img src="trabajo_files/figure-html/unnamed-chunk-12-1.png" width="480" /></p>
+</div>
+<div id="resultados" class="section level2">
 <h2>Resultados</h2>
+<p>Respondiendo a la motivación inicial, la probabildad estimada de que el río desborde superando los 10000 <span class="math inline">\(m^3/s\)</span> en un mes es de <span class="math inline">\(0.0053\)</span>. No obstante, usando el enfoque considerado se puede ser más específico en la respuesta. Por ejemplo, la probabilidad de que el río desborde en el mes de Junio es de <span class="math inline">\(0.0464\)</span>.</p>
+<hr />
 <div id="refs" class="references">
 <div id="ref-mcleod1994diagnostic">
 <p>McLeod, A Ian. 1994. “Diagnostic Checking of Periodic Autoregression Models with Application.” <em>Journal of Time Series Analysis</em> 15 (2). Wiley Online Library: 221–33.</p>
@@ -512,8 +446,6 @@ ggplot(plot.datos, aes(x=River, fill=Month, colour=Month))+geom_density(alpha=0.
 
 
 
-</div>
-</div>
 
 </div>
 

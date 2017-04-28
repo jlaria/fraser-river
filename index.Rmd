@@ -10,4 +10,34 @@ El río Fraser es el río más largo de Columbia Británica, en Canadá, con má
 
 El río lleva el nombre del explorador y comerciante de pieles Simon Fraser, quien dirigió una expedición en 1808 para la Compañía del Noroeste desde el sitio de la actual Prince George hasta la desembocadura del río.
 
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+  $('#fs-overview-link').click(function () {
+    if (screenfull.enabled) {
+      screenfull.request($('#fs-overview-target')[0]);
+    }
+  });
+});
+</script>
+<div class="panel panel-default">
+<div class="panel-heading">
+<h2 class="panel-title">
+R Basics (<a href="slides.html">HTML</a>) <a id="fs-overview-link" class="pull-right" href="#"><i class="fa fa-arrows-alt"></i></a>
+</h2>
+</div>
+<div class="panel-body">
+<div class="embed-responsive embed-responsive-4by3">
+<iframe id="fs-overview-target" src="slides.html" allowfullscreen seamless>
+<p>Your browser does not support iframes.</p>
+</iframe>
+<!--<iframe src="http://www.w3schools.com">-->
+<!--<p>Your browser does not support iframes.</p>-->
+<!--</iframe>-->
+</div>
+</div>
+</div>
+
+
 -------------------------

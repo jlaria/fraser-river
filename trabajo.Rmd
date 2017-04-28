@@ -1,10 +1,12 @@
 ---
 title: "Predicción de catástrofes en Fraser River"
 output:
-  html_document: 
-    code_folding: hide 
-    toc: true
-    toc_float: true
+  html_document:
+    code_folding: hide
+    toc: yes
+    toc_float: no
+  pdf_document:
+    toc: yes
 bibliography: refs.bib
 ---
 
@@ -49,17 +51,17 @@ $$ y_t = \phi_{0s} + \phi_{1s} y_{t-1} + \varphi_{s}\epsilon_t, \quad \epsilon_t
 El modelo jerárquico queda,
 
 1. $Y_{t} \big|\{ \phi_{0s}, \phi_{1s}, \varphi_s, Y_{t-1} \} \sim Normal(\phi_{0s} + \phi_{1s} Y_{t-1}, \varphi_s)$,
-2. $\phi_{0s}\sim Normal(\mu, \sigma^2)$,
-3. $\phi_{1s}\sim Normal(\mu, \sigma^2)$,
+2. $\phi_{0s}\sim Normal(\mu_0, \sigma_0^2)$,
+3. $\phi_{1s}\sim Normal(\mu_1, \sigma_1^2)$,
 4. $\varphi_{s}\sim InvGamma(\alpha, \beta)$.
 
 ## Implementación
 
 Para estimar los parámetros del modelo se ha utilizado la librería `rstan` de `R`. 
 
-Se ha aplicado previamente a los datos una transformación logarítmica. Esto se sugiere en @mcleod1994diagnostic, cuando se tienen datos reales, con el fin de estabilizar la varianza.
+Se ha aplicado previamente a los datos una transformación logarítmica. Esto lo sugiere @mcleod1994diagnostic, cuando se tienen datos reales, con el fin de estabilizar la varianza.
 
-```{r}
+```{r, message=FALSE}
 # Centramos los datos para que las observaciones comiencen en el mes de enero.
 flow <- log(c(as(river[-(1:10),],'double'),as(river[(1:10),],'double')))
 
@@ -79,15 +81,17 @@ Para estimar la probabilidad de que el río desborde simularemos muchas observac
 
 El código del programa en Stan para el modelo considerado sería como sigue.
 ```{r}
-programa<-'
+programa<-' 
 data{
   // Datos externos
   int<lower=1> N; // Tamaño de la serie
   int<lower=1> N_new; // Tamaño de la serie a predecir
   real<lower=0> y[N]; // Serie observada
   real jan_new; // Valor (fijo) del mes de Enero de la serie a predecir  
-  real mu; 
-  real<lower=0> sigma; 
+  real mu0; 
+  real<lower=0> sigma0; 
+  real mu1; 
+  real<lower=0> sigma1;
   real<lower=0> alpha;
   real<lower=0> beta;
 }
@@ -117,8 +121,8 @@ model{
   }
   
   for (s in 1:12){
-    phi0[s] ~ normal( mu, sigma ); // densidad a-priori normal
-    phi1[s] ~ normal( mu, sigma );
+    phi0[s] ~ normal( mu0, sigma0 ); // densidad a-priori normal
+    phi1[s] ~ normal( mu1, sigma1 );
     varphi2[s] ~ inv_gamma( alpha, beta ); // densidad a-priori inversa gamma
   }
 }
@@ -145,7 +149,7 @@ generated quantities{
 Compilamos el código de Stan.
 ```{r}
 library(rstan)
-rstan_options(auto_write=T)
+rstan_options(auto_write=T) 
 options(mc.cores=parallel::detectCores()-1)
 
 programa_c<-stan_model(model_code=programa)
@@ -156,39 +160,40 @@ Preparamos los parámetros del modelo.
 N <- length(flow) 
 N_new <- 144
 jan_new <- flow[1]
-alpha <- 0.5
-beta <- 0.5
-mu <- 3
-sigma <- 100
-datos <- list(y=flow, N=N, N_new=N_new, jan_new=jan_new, mu=mu, sigma=sigma, beta=beta, alpha=alpha)
+alpha <- 0.5 -> beta
+mu0 <- 3 -> mu1 
+sigma0 <- 100 -> sigma1
+datos <- list(y=flow, N=N, N_new=N_new, jan_new=jan_new, mu0=mu0, sigma0=sigma0, mu1=mu1, sigma1=sigma1, beta=beta, alpha=alpha)
 ```
 
 Note que se ha considerado una *a priori* poco informativa para la media mensual del nivel del río y la pendiente entre meses consecutivos, pues se tiene una muestra de datos suficientemente grande para estimar estos parámetros. Para la varianza del nivel medio mensual también se ha considerado una *a-priori* poco informativa, equivalente a una observación con varianza $1$. 
 
 Simulamos del modelo de Stan.
 ```{r, message=FALSE}
-result <- sampling(programa_c, data=datos, iter=1500, chains=1)
+result <- sampling(programa_c, data=datos, iter=1500, chains=1)  
 ```
 
 Extraemos los resultados del modelo.
 ```{r}
-result.sim <- rstan::extract(result)
-# Número medio de desbordamientos en la simulación.
-mean(result.sim$y_new[,]>log(10000))
+result.sim <- rstan::extract(result) 
+# Número medio de desbordamientos en la simulación. 
+mean(result.sim$y_new[,]>log(10000)) 
+
+mean(result.sim$y_new[,12*(2:11)+6]>log(10000)) 
 ```
 
 Podemos observar las trayectorias simuladas.
 ```{r}
 river.flow <- matrix(t(result.sim$y_new[sample(1:500, 30),13:144]), ncol= 12, byrow = T)
 as_refundObj(river.flow) %>%
-  ggplot(aes(x = index, y = value, group = id)) + geom_path(alpha = .1)
+  ggplot(aes(x = index, y = value, group = id)) + geom_path(alpha = .1) 
 
 ```
 
 Podemos visualizar la función de densidad marginal del nivel medio del río en cierto mes.
 
 ```{r}
-dat <- data.frame(river.flow) 
+dat <- data.frame(river.flow)  
 names(dat)<-month.name
 
 plot.datos<-data.frame(Month=rep(c('Abril','Mayo'), each=nrow(dat)), River=c(dat$April, dat$May))
@@ -198,6 +203,15 @@ ggplot(plot.datos, aes(x=River, fill=Month, colour=Month))+geom_density(alpha=0.
 
 Como se observa en la figura anterior, el modelo estimado capta la diferencia en el régimen de lluvias entre los meses de Abril y Mayo.
 
+## Diagnósticos
+
+```{r}
+traceplot(result, pars="phi0[1]", inc_warmup=TRUE)
+```
+
+
 ## Resultados
 
+Respondiendo a la motivación inicial, la probabildad estimada de que el río desborde superando los 10000 $m^3/s$ en un mes es de $0.0053$. No obstante, usando el enfoque considerado se puede ser más específico en la respuesta. Por ejemplo, la probabilidad de que el río desborde en el mes de Junio es de $0.0464$.
 
+---------------------

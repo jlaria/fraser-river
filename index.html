@@ -15,27 +15,12 @@
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/flatly.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-1.1/default.css" rel="stylesheet" />
-<script src="site_libs/highlightjs-1.1/highlight.js"></script>
 
-<style type="text/css">code{white-space: pre;}</style>
-<style type="text/css">
-  pre:not([class]) {
-    background-color: white;
-  }
-</style>
-<script type="text/javascript">
-if (window.hljs && document.readyState && document.readyState === "complete") {
-   window.setTimeout(function() {
-      hljs.initHighlighting();
-   }, 0);
-}
-</script>
 
 
 
@@ -97,34 +82,34 @@ button.code-folding-btn:focus {
 <style type="text/css">
 /* padding for bootstrap navbar */
 body {
-  padding-top: 60px;
+  padding-top: 51px;
   padding-bottom: 40px;
 }
 /* offset scroll position for anchor links (for fixed navbar)  */
 .section h1 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 
 .section h2 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h3 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h4 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h5 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 .section h6 {
-  padding-top: 65px;
-  margin-top: -65px;
+  padding-top: 56px;
+  margin-top: -56px;
 }
 </style>
 
@@ -201,6 +186,34 @@ $(document).ready(function () {
 <p><a href="http://www.youtube.com/watch?v=Pl7ZEt1LFiQ"><img src="http://img.youtube.com/vi/Pl7ZEt1LFiQ/0.jpg" alt="IMAGE ALT TEXT HERE" /></a></p>
 <p>El río Fraser es el río más largo de Columbia Británica, en Canadá, con más de 1375 km de longitud, el décimo río más largo de Canadá. Se localiza completamente dentro de la provincia de Columbia Británica. Nace en el paso Fraser, cerca del monte Robson, en las Montañas Rocosas Canadienses y desemboca en el océano Pacífico en el estrecho de Georgia, en la ciudad de Vancouver. El delta del río se ubica en la región metropolitana de Vancouver <span class="citation">(Wikipedia 2017)</span>.</p>
 <p>El río lleva el nombre del explorador y comerciante de pieles Simon Fraser, quien dirigió una expedición en 1808 para la Compañía del Noroeste desde el sitio de la actual Prince George hasta la desembocadura del río.</p>
+<script type="text/javascript">
+$(document).ready(function() {
+  $('#fs-overview-link').click(function () {
+    if (screenfull.enabled) {
+      screenfull.request($('#fs-overview-target')[0]);
+    }
+  });
+});
+</script>
+<div class="panel panel-default">
+<div class="panel-heading">
+<h2 class="panel-title">
+R Basics (<a href="slides.html">HTML</a>) <a id="fs-overview-link" class="pull-right" href="#"><i class="fa fa-arrows-alt"></i></a>
+</h2>
+</div>
+<div class="panel-body">
+<div class="embed-responsive embed-responsive-4by3">
+<iframe id="fs-overview-target" src="slides.html" allowfullscreen seamless>
+<p>
+Your browser does not support iframes.
+</p>
+</iframe>
+<!--<iframe src="http://www.w3schools.com">-->
+<!--<p>Your browser does not support iframes.</p>-->
+<!--</iframe>-->
+</div>
+</div>
+</div>
 <hr />
 <div id="refs" class="references">
 <div id="ref-wiki:fraser">
