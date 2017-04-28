@@ -3,9 +3,9 @@ output_dir: "."
 navbar:
   title: "Trabajo Final Estadística Bayesiana"
   left:
-    - text: "Home"
+    - text: "Inicio"
       href: index.html
-    - text: "Report"
+    - text: "Informe"
       href: trabajo.html
 output:
   html_document:

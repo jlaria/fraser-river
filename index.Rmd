@@ -1,6 +1,13 @@
 ---
-title: "Welcome!"
+title: "Fraser River - Hope, BC"
 output: html_document
+bibliography: refs.bib
 ---
 
-Hello world
+[![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/Pl7ZEt1LFiQ/0.jpg)](http://www.youtube.com/watch?v=Pl7ZEt1LFiQ)
+
+El río Fraser es el río más largo de Columbia Británica, en Canadá, con más de 1375 km de longitud, el décimo río más largo de Canadá. Se localiza completamente dentro de la provincia de Columbia Británica. Nace en el paso Fraser, cerca del monte Robson, en las Montañas Rocosas Canadienses y desemboca en el océano Pacífico en el estrecho de Georgia, en la ciudad de Vancouver. El delta del río se ubica en la región metropolitana de Vancouver [@wiki:fraser].
+
+El río lleva el nombre del explorador y comerciante de pieles Simon Fraser, quien dirigió una expedición en 1808 para la Compañía del Noroeste desde el sitio de la actual Prince George hasta la desembocadura del río.
+
+-------------------------
