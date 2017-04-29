@@ -1,12 +1,12 @@
 ---
 title: "Predicción de catástrofes en Fraser River"
 output:
+  pdf_document:
+    toc: yes
   html_document:
     code_folding: hide
     toc: yes
     toc_float: no
-  pdf_document:
-    toc: yes
 bibliography: refs.bib
 ---
 
