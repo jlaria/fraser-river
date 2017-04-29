@@ -11,7 +11,7 @@ bibliography: refs.bib
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, cache = TRUE, fig.width = 5, fig.height = 5)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE, fig.width = 5, fig.height = 5, fig.align = 'center')
 ```
 
 ## Motivación
@@ -53,11 +53,11 @@ El modelo jerárquico queda,
 1. $Y_{t} \big|\{ \phi_{0s}, \phi_{1s}, \varphi_s, Y_{t-1} \} \sim Normal(\phi_{0s} + \phi_{1s} Y_{t-1}, \varphi_s)$,
 2. $\phi_{0s}\sim Normal(\mu_0, \sigma_0^2)$,
 3. $\phi_{1s}\sim Normal(\mu_1, \sigma_1^2)$,
-4. $\varphi_{s}\sim InvGamma(\alpha, \beta)$.
+4. $\varphi_{s}^2\sim InvGamma(\alpha, \beta)$.
 
 ## Implementación
 
-Para estimar los parámetros del modelo se ha utilizado la librería `rstan` de `R`. 
+Para estimar los parámetros del modelo se ha utilizado la librería [`rstan`](http://mc-stan.org/interfaces/rstan.html) de `R`. 
 
 Se ha aplicado previamente a los datos una transformación logarítmica. Esto lo sugiere @mcleod1994diagnostic, cuando se tienen datos reales, con el fin de estabilizar la varianza.
 
@@ -86,7 +86,7 @@ data{
   // Datos externos
   int<lower=1> N; // Tamaño de la serie
   int<lower=1> N_new; // Tamaño de la serie a predecir
-  real<lower=0> y[N]; // Serie observada
+  real y[N]; // Serie observada
   real jan_new; // Valor (fijo) del mes de Enero de la serie a predecir  
   real mu0; 
   real<lower=0> sigma0; 
@@ -178,7 +178,7 @@ Extraemos los resultados del modelo.
 result.sim <- rstan::extract(result) 
 # Número medio de desbordamientos en la simulación. 
 mean(result.sim$y_new[,]>log(10000)) 
-
+# Número medio de desbordamientos en la simulación para el mes de Junio. 
 mean(result.sim$y_new[,12*(2:11)+6]>log(10000)) 
 ```
 
@@ -192,7 +192,8 @@ as_refundObj(river.flow) %>%
 
 Podemos visualizar la función de densidad marginal del nivel medio del río en cierto mes.
 
-```{r}
+```{r, fig.width=8}
+river.flow <- matrix(t(result.sim$y_new[,13:144]), ncol= 12, byrow = T)
 dat <- data.frame(river.flow)  
 names(dat)<-month.name
 
@@ -205,13 +206,20 @@ Como se observa en la figura anterior, el modelo estimado capta la diferencia en
 
 ## Diagnósticos
 
-```{r}
+Diagnóstico usando el *traceplot* del *muestreo de Gibbs* para la variable $\phi_{01}$. 
+
+```{r, fig.width=8}
 traceplot(result, pars="phi0[1]", inc_warmup=TRUE)
 ```
 
-
+También es posible diagnosticar la simulación observando las columnas `Rhat` y `n_eff` (número efectivo de observaciones simuladas).
+```{r}
+print(result, pars = result@sim$pars_oi[c(1,2,4)])
+```
+En este caso, `Rhat` es muy cercano a $1$ y `n_eff` es suficientemente grande.
+ 
 ## Resultados
 
-Respondiendo a la motivación inicial, la probabildad estimada de que el río desborde superando los 10000 $m^3/s$ en un mes es de $0.0053$. No obstante, usando el enfoque considerado se puede ser más específico en la respuesta. Por ejemplo, la probabilidad de que el río desborde en el mes de Junio es de $0.0464$.
+Respondiendo la motivación inicial, la probabildad estimada de que el río desborde superando los 10000 $m^3/s$ en un mes es de $0.0056$. No obstante, usando el enfoque considerado se puede ser más específico en la respuesta. Por ejemplo, la probabilidad de que el río desborde en el mes de Junio es de $0.05$. 
 
 ---------------------

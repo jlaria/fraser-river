@@ -1,7 +1,7 @@
 slides
 ========================================================
-author: 
-date: 
+author: JC Laria de la Cruz
+date: May 10, 2017
 autosize: true
 
 First Slide
