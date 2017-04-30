@@ -87,7 +87,7 @@ as_refundObj(river.flow) %>%
 Modelo en Stan
 =======================================================
 
-[Completo](https://jlaria.github.io/fraser-river/trabajo.html)
+[Full source code](https://jlaria.github.io/fraser-river/trabajo.html#implementacion)
 
 ```{r, eval=FALSE}
   for(i in 2:N){

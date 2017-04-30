@@ -84,7 +84,7 @@ Estos son nuestros datos. Aplicamos una transformación logarítmica.
 Modelo en Stan
 =======================================================
 
-[Completo](https://jlaria.github.io/fraser-river/trabajo.html)
+[Full source code](https://jlaria.github.io/fraser-river/trabajo.html#implementacion)
 
 
 ```r
