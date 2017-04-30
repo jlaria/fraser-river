@@ -75,9 +75,7 @@ as_refundObj(river.flow) %>%
 
 
 
-Para estimar la probabilidad de que el río desborde simularemos muchas observaciones de la serie. La probabilidad de que el río desborde será estimada a través de la proporción de veces que el nivel medio ha sobrepasado el límite en las series simuladas.
-
-
+Para estimar la probabilidad de que el río desborde simularemos muchas observaciones de la serie. La probabilidad de que el río desborde será estimada a través de la proporción de veces que el nivel medio ha sobrepasado el límite en las series simuladas. Note que, como señala @hoff2009first, con los algoritmos de Monte Carlo y MCMC no se genera más información que aquella presente en los datos y en la *prior*. 
 
 El código del programa en Stan para el modelo considerado sería como sigue.
 ```{r}
@@ -147,7 +145,7 @@ generated quantities{
 ```
 
 Compilamos el código de Stan.
-```{r}
+```{r, message=FALSE}
 library(rstan)
 rstan_options(auto_write=T) 
 options(mc.cores=parallel::detectCores()-1)

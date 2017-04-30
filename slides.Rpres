@@ -1,28 +1,159 @@
-slides
+PAR(1) models in stan. Application to Fraser River data
 ========================================================
 author: JC Laria de la Cruz
 date: May 10, 2017
 autosize: true
 
-First Slide
+
+Datos
 ========================================================
 
-For more details on authoring R presentations please visit <https://support.rstudio.com/hc/en-us/articles/200486468>.
-
-- Bullet 1
-- Bullet 2
-- Bullet 3
-
-Slide With Code
-========================================================
+Fuente: <http://lib.stat.cmu.edu/datasets/fraser-river>. 
+  - $946$ observaciones de una variable (nivel medio mensual).
 
 ```{r}
-summary(cars)
+river <- read.table('fraser-river.txt'); head(river)
 ```
 
-Slide With Plot
+
+Datos
+========================================================
+
+```{r, echo=FALSE, fig.width=10}
+ts.plot(river[1:36,], ylab='Nivel del río', xlab='Meses', main='Evolución del río en tres años')
+```
+
+
+Datos
 ========================================================
 
 ```{r, echo=FALSE}
-plot(cars)
+acf(river, main='Gráfico de autocorrelaciones')
 ```
+
+
+Ojetivo
+========================================================
+
+Parte $A$
+- Se pide estimar la *probabilidad* de que el río desborde en un mes superando los $10000 m^3/s$.
+
+![IMAGE ALT TEXT HERE](http://img.youtube.com/vi/Pl7ZEt1LFiQ/0.jpg)
+
+Modelo
+========================================================
+
+Parte $A\cdot B$
+- Modelamos el nivel del río utilizando un PAR(1) - *Periodic Autoregressive Model of order 1*.
+- Un modelo AR(1) tiene la forma
+
+$$ y_t \sim Normal(\phi_0+\phi_1 y_{t-1}, \varphi)$$
+
+- En un modelo PAR(1) incluimos componentes que varían según la estación. En nuestro caso el período de la serie (el número de estaciones) es 12.
+
+$$ y_t \sim Normal(\phi_{0s}+\phi_{1s} y_{t-1}, \varphi_s), s=1,2, \ldots 12.$$
+
+
+Modelo Jerárquico
+========================================================
+
+
+- $Y_{t} \big|\{ \phi_{0s}, \phi_{1s}, \varphi_s, Y_{t-1} \} \sim Normal(\phi_{0s} + \phi_{1s} Y_{t-1}, \varphi_s)$,
+- $\phi_{0s}\sim Normal(\mu_0, \sigma_0^2)$,
+- $\phi_{1s}\sim Normal(\mu_1, \sigma_1^2)$,
+- $\varphi_{s}^2\sim InvGamma(\alpha, \beta)$.
+
+Estamos interesados en $P(Y_t > 10000)$. Note que $t$ depende de $s$, por ejemplo, 
+
+$$ t = 12 \cdot n + s, \quad n \in \mathbb{Z}_+.$$
+
+Datos transformados y centrados
+========================================================
+
+Estos son nuestros datos. Aplicamos una transformación logarítmica.
+
+```{r, echo=FALSE, fig.width=12}
+# Centramos los datos para que las observaciones comiencen en el mes de enero.
+flow <- log(c(as(river[-(1:10),],'double'),as(river[(1:10),],'double')))
+
+library(refund)
+library(refund.shiny)
+library(tidyverse)
+river.flow <- matrix(flow[1:936], ncol= 12, byrow = T)
+as_refundObj(river.flow) %>%
+  ggplot(aes(x = index, y = value, group = id)) + geom_path(alpha = .2)
+```
+
+Modelo en Stan
+=======================================================
+
+[Completo](https://jlaria.github.io/fraser-river/trabajo.html)
+
+```{r, eval=FALSE}
+  for(i in 2:N){
+    y[i] ~ normal( phi0[season]+phi1[season]*y[i-1], varphi[season] );
+    season=season+1;
+    if(season>12){
+      season=1;
+    }
+  }
+```
+
+Trayectorias Simuladas
+======================================================
+
+```{r, fig.width=12, echo=FALSE}
+load('.RData')
+river.flow <- matrix(t(result.sim$y_new[sample(1:500, 30),13:144]), ncol= 12, byrow = T)
+as_refundObj(river.flow) %>%
+  ggplot(aes(x = index, y = value, group = id)) + geom_path(alpha = .1) 
+
+```
+
+Densidad de probabilidad marginal
+======================================================
+
+```{r, fig.width=12, echo=FALSE}
+river.flow <- matrix(t(result.sim$y_new[,13:144]), ncol= 12, byrow = T)
+dat <- data.frame(river.flow)  
+names(dat)<-month.name
+
+plot.datos<-data.frame(Month=rep(c('Abril','Mayo'), each=nrow(dat)), River=c(dat$April, dat$May))
+
+ggplot(plot.datos, aes(x=River, fill=Month, colour=Month))+geom_density(alpha=0.3)
+```
+
+Probabilidad de desbordamiento por mes
+=====================================================
+
+
+```{r, echo=FALSE}
+ d <- t(as(sapply(5:8, function(x) mean(result.sim$y_new[,12*(2:11)+x]>log(10000))),'matrix'))
+ colnames(d)<- month.name[5:8]
+ rownames(d)<- 'Prob.'
+ knitr::kable(d)
+```
+
+Gráficos de diognóstico
+=========================================
+
+Diagnóstico usando el *traceplot* del *muestreo de Gibbs* para la variable $\phi_{01}$. 
+
+```{r, fig.width=12, echo=FALSE}
+library(rstan)
+traceplot(result, pars="phi0[1]", inc_warmup=TRUE)
+```
+
+Resultados
+========================================
+
+Parte $B^{-1}\cdot A \cdot B$.
+
+- La probabildad estimada de que el río desborde superando los 10000 $m^3/s$ en un mes es de $0.0053$.
+- La probabilidad de que el río desborde en el mes de Junio es de $0.0472$.
+
+```{r, eval=FALSE}
+mean(result.sim$y_new[,]>log(10000))  
+mean(result.sim$y_new[,12*(2:11)+6]>log(10000)) 
+```
+

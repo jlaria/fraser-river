@@ -306,7 +306,7 @@ river.flow &lt;-<span class="st"> </span><span class="kw">matrix</span>(flow[<sp
 <span class="kw">as_refundObj</span>(river.flow) %&gt;%
 <span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> index, <span class="dt">y =</span> value, <span class="dt">group =</span> id)) +<span class="st"> </span><span class="kw">geom_path</span>(<span class="dt">alpha =</span> .<span class="dv">2</span>)</code></pre></div>
 <p><img src="trabajo_files/figure-html/unnamed-chunk-4-1.png" width="480" style="display: block; margin: auto;" /></p>
-<p>Para estimar la probabilidad de que el río desborde simularemos muchas observaciones de la serie. La probabilidad de que el río desborde será estimada a través de la proporción de veces que el nivel medio ha sobrepasado el límite en las series simuladas.</p>
+<p>Para estimar la probabilidad de que el río desborde simularemos muchas observaciones de la serie. La probabilidad de que el río desborde será estimada a través de la proporción de veces que el nivel medio ha sobrepasado el límite en las series simuladas. Note que, como señala <span class="citation">Hoff (2009)</span>, con los algoritmos de Monte Carlo y MCMC no se genera más información que aquella presente en los datos y en la <em>prior</em>.</p>
 <p>El código del programa en Stan para el modelo considerado sería como sigue.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">programa&lt;-<span class="st">&#39; </span>
 <span class="st">data{</span>
@@ -372,18 +372,8 @@ river.flow &lt;-<span class="st"> </span><span class="kw">matrix</span>(flow[<sp
 <span class="st">}</span>
 <span class="st">&#39;</span></code></pre></div>
 <p>Compilamos el código de Stan.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(rstan)</code></pre></div>
-<pre><code>## Loading required package: StanHeaders</code></pre>
-<pre><code>## rstan (Version 2.14.1, packaged: 2016-12-28 14:55:41 UTC, GitRev: 5fa1e80eb817)</code></pre>
-<pre><code>## For execution on a local, multicore CPU with excess RAM we recommend calling
-## rstan_options(auto_write = TRUE)
-## options(mc.cores = parallel::detectCores())</code></pre>
-<pre><code>## 
-## Attaching package: &#39;rstan&#39;</code></pre>
-<pre><code>## The following object is masked from &#39;package:tidyr&#39;:
-## 
-##     extract</code></pre>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">rstan_options</span>(<span class="dt">auto_write=</span>T) 
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(rstan)
+<span class="kw">rstan_options</span>(<span class="dt">auto_write=</span>T) 
 <span class="kw">options</span>(<span class="dt">mc.cores=</span>parallel::<span class="kw">detectCores</span>()-<span class="dv">1</span>)
 
 programa_c&lt;-<span class="kw">stan_model</span>(<span class="dt">model_code=</span>programa)</code></pre></div>
@@ -500,6 +490,9 @@ plot.datos&lt;-<span class="kw">data.frame</span>(<span class="dt">Month=</span>
 <p>Respondiendo la motivación inicial, la probabildad estimada de que el río desborde superando los 10000 <span class="math inline">\(m^3/s\)</span> en un mes es de <span class="math inline">\(0.0056\)</span>. No obstante, usando el enfoque considerado se puede ser más específico en la respuesta. Por ejemplo, la probabilidad de que el río desborde en el mes de Junio es de <span class="math inline">\(0.05\)</span>.</p>
 <hr />
 <div id="refs" class="references">
+<div id="ref-hoff2009first">
+<p>Hoff, P.D. 2009. <em>A First Course in Bayesian Statistical Methods</em>. Springer Texts in Statistics. Springer New York. <a href="https://books.google.es/books?id=V8jT2SimGR0C" class="uri">https://books.google.es/books?id=V8jT2SimGR0C</a>.</p>
+</div>
 <div id="ref-mcleod1994diagnostic">
 <p>McLeod, A Ian. 1994. “Diagnostic Checking of Periodic Autoregression Models with Application.” <em>Journal of Time Series Analysis</em> 15 (2). Wiley Online Library: 221–33.</p>
 </div>
