@@ -48,7 +48,15 @@ acf(river)
 
 Todas las correlaciones entre meses son significativas. Aunque pudiese tratarse el problema analizando todas estas dependencias para cada mes, el modelo resultante sería demasiado complicado y posiblemente asociado a pobres estimaciones de los parámetros. Es lógico suponer que dada una fecha, el nivel del río ese mes dependerá de dos componentes: el nivel del río observado en el mes anterior y el nivel medio histórico del río ese mes. Se formulará este problema como sigue,
 
-$$ y_t = \phi_{0s} + \phi_{1s} y_{t-1} + \varphi_{s}\epsilon_t, \quad \epsilon_t \sim N(0,1), $$ donde $s=1,2 \ldots 12$, $t=1,2 \ldots n$. Los parámetros $\phi_{0s}$ controlan el nivel medio del río en cada mes según el hitórico, mientras que $\phi_{1s}$ determina la tendencia para cada año. Es lógico suponer que la varianza $\varphi_s$ varía según el mes. Por ejemplo, el mes de Marzo suele ser poco lluvioso siempre, mientras que otros meses como Mayo pueden ser lluviosos o no. 
+$$ y_t = \phi_{0s} + \phi_{1s} y_{t-1} + \varphi_{s}\epsilon_t, \quad \epsilon_t \sim N(0,1), $$ 
+donde $s=1,2 \ldots 12$, $t=1,2 \ldots n$. 
+
+Esta formulación corresponde a un modelo PAR(1) - *Periodic Autoregressive model of first order*. Es muy similar a la de un modelo AR(1), cuya implementación en `stan` puede encontrarse en el [manual](https://github.com/stan-dev/stan/releases/download/v2.15.0/stan-reference-2.15.0.pdf) oficial de `stan`. Un modelo AR(1) tiene la forma,
+$$ y_t = \phi_{0} + \phi_{1} y_{t-1} + \varphi \epsilon_t, \quad \epsilon_t \sim N(0,1).$$ 
+
+El modelo PAR(1) puede interpretarse como una extensión natural del AR(1) para trabajar con datos periódicos.
+
+Los parámetros $\phi_{0s}$ controlan el nivel medio del río en cada mes según el hitórico, mientras que $\phi_{1s}$ determina la tendencia para cada mes. Es lógico suponer que la varianza $\varphi_s$ varía según el mes. Por ejemplo, el mes de Marzo suele ser poco lluvioso siempre, mientras que otros meses como Mayo pueden ser lluviosos o no. 
 
 El modelo jerárquico queda,
 
@@ -56,6 +64,10 @@ El modelo jerárquico queda,
 2. $\phi_{0s}\sim Normal(\mu_0, \sigma_0^2)$,
 3. $\phi_{1s}\sim Normal(\mu_1, \sigma_1^2)$,
 4. $\varphi_{s}^2\sim InvGamma(\alpha, \beta)$.
+
+Note que $s$ depende de $t$. Por ejemplo, $t= 12n+s$, $n\in \mathbb{Z}_+$.
+
+Para responder la cuestión inicial estamos interesados en estudiar la distribución marginal del vector aleatorio $(Y_1, Y_2, Y_3 \ldots )$.
 
 ## Implementación
 
@@ -161,8 +173,10 @@ N <- length(flow)
 N_new <- 144
 jan_new <- flow[1]
 alpha <- 0.5 -> beta
-mu0 <- 3 -> mu1 
-sigma0 <- 100 -> sigma1
+mu0 <- 3 
+sigma0 <- 100
+mu1 <- 0
+sigma1 <- 100
 datos <- list(y=flow, N=N, N_new=N_new, jan_new=jan_new, mu0=mu0, sigma0=sigma0, mu1=mu1, sigma1=sigma1, beta=beta, alpha=alpha)
 ```
 
@@ -170,13 +184,13 @@ Note que se ha considerado una *a priori* poco informativa para la media mensual
 
 Simulamos del modelo de Stan.
 ```{r, message=FALSE}
-result <- sampling(programa_c, data=datos, iter=1500, chains=1)  
+result <- sampling(programa_c, data=datos, iter=1500, chains=1) 
 ```
 
 Extraemos los resultados del modelo.
 ```{r}
-result.sim <- rstan::extract(result) 
-# Número medio de desbordamientos en la simulación. 
+result.sim <- rstan::extract(result)
+# Número medio de desbordamientos en la simulación.
 mean(result.sim$y_new[,]>log(10000)) 
 # Número medio de desbordamientos en la simulación para el mes de Junio. 
 mean(result.sim$y_new[,12*(2:11)+6]>log(10000)) 
@@ -186,7 +200,7 @@ Podemos observar las trayectorias simuladas.
 ```{r}
 river.flow <- matrix(t(result.sim$y_new[sample(1:500, 30),13:144]), ncol= 12, byrow = T)
 as_refundObj(river.flow) %>%
-  ggplot(aes(x = index, y = value, group = id)) + geom_path(alpha = .1) 
+  ggplot(aes(x = index, y = value, group = id)) + geom_path(alpha = .1)
 
 ```
 
@@ -220,6 +234,6 @@ En este caso, `Rhat` es muy cercano a $1$ y `n_eff` es suficientemente grande.
  
 ## Resultados
 
-Respondiendo la motivación inicial, la probabildad estimada de que el río desborde superando los 10000 $m^3/s$ en un mes es de $0.0056$. No obstante, usando el enfoque considerado se puede ser más específico en la respuesta. Por ejemplo, la probabilidad de que el río desborde en el mes de Junio es de $0.05$. 
+Respondiendo la motivación inicial, la probabildad estimada de que el río desborde superando los 10000 $m^3/s$ en un mes es cercana a $5\cdot 10^{-3}$. No obstante, usando el enfoque considerado se puede ser más específico en la respuesta. Por ejemplo, la probabilidad de que el río desborde en el mes de Junio es de aproximadamente $5 \cdot 10^{-2}$. 
 
 ---------------------

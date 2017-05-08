@@ -283,7 +283,10 @@ $(document).ready(function () {
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">acf</span>(river)</code></pre></div>
 <p><img src="trabajo_files/figure-html/unnamed-chunk-3-1.png" width="480" style="display: block; margin: auto;" /></p>
 <p>Todas las correlaciones entre meses son significativas. Aunque pudiese tratarse el problema analizando todas estas dependencias para cada mes, el modelo resultante sería demasiado complicado y posiblemente asociado a pobres estimaciones de los parámetros. Es lógico suponer que dada una fecha, el nivel del río ese mes dependerá de dos componentes: el nivel del río observado en el mes anterior y el nivel medio histórico del río ese mes. Se formulará este problema como sigue,</p>
-<p><span class="math display">\[ y_t = \phi_{0s} + \phi_{1s} y_{t-1} + \varphi_{s}\epsilon_t, \quad \epsilon_t \sim N(0,1), \]</span> donde <span class="math inline">\(s=1,2 \ldots 12\)</span>, <span class="math inline">\(t=1,2 \ldots n\)</span>. Los parámetros <span class="math inline">\(\phi_{0s}\)</span> controlan el nivel medio del río en cada mes según el hitórico, mientras que <span class="math inline">\(\phi_{1s}\)</span> determina la tendencia para cada año. Es lógico suponer que la varianza <span class="math inline">\(\varphi_s\)</span> varía según el mes. Por ejemplo, el mes de Marzo suele ser poco lluvioso siempre, mientras que otros meses como Mayo pueden ser lluviosos o no.</p>
+<p><span class="math display">\[ y_t = \phi_{0s} + \phi_{1s} y_{t-1} + \varphi_{s}\epsilon_t, \quad \epsilon_t \sim N(0,1), \]</span> donde <span class="math inline">\(s=1,2 \ldots 12\)</span>, <span class="math inline">\(t=1,2 \ldots n\)</span>.</p>
+<p>Esta formulación corresponde a un modelo PAR(1) - <em>Periodic Autoregressive model of first order</em>. Es muy similar a la de un modelo AR(1), cuya implementación en <code>stan</code> puede encontrarse en el <a href="https://github.com/stan-dev/stan/releases/download/v2.15.0/stan-reference-2.15.0.pdf">manual</a> oficial de <code>stan</code>. Un modelo AR(1) tiene la forma, <span class="math display">\[ y_t = \phi_{0} + \phi_{1} y_{t-1} + \varphi \epsilon_t, \quad \epsilon_t \sim N(0,1).\]</span></p>
+<p>El modelo PAR(1) puede interpretarse como una extensión natural del AR(1) para trabajar con datos periódicos.</p>
+<p>Los parámetros <span class="math inline">\(\phi_{0s}\)</span> controlan el nivel medio del río en cada mes según el hitórico, mientras que <span class="math inline">\(\phi_{1s}\)</span> determina la tendencia para cada mes. Es lógico suponer que la varianza <span class="math inline">\(\varphi_s\)</span> varía según el mes. Por ejemplo, el mes de Marzo suele ser poco lluvioso siempre, mientras que otros meses como Mayo pueden ser lluviosos o no.</p>
 <p>El modelo jerárquico queda,</p>
 <ol style="list-style-type: decimal">
 <li><span class="math inline">\(Y_{t} \big|\{ \phi_{0s}, \phi_{1s}, \varphi_s, Y_{t-1} \} \sim Normal(\phi_{0s} + \phi_{1s} Y_{t-1}, \varphi_s)\)</span>,</li>
@@ -291,6 +294,8 @@ $(document).ready(function () {
 <li><span class="math inline">\(\phi_{1s}\sim Normal(\mu_1, \sigma_1^2)\)</span>,</li>
 <li><span class="math inline">\(\varphi_{s}^2\sim InvGamma(\alpha, \beta)\)</span>.</li>
 </ol>
+<p>Note que <span class="math inline">\(s\)</span> depende de <span class="math inline">\(t\)</span>. Por ejemplo, <span class="math inline">\(t= 12n+s\)</span>, <span class="math inline">\(n\in \mathbb{Z}_+\)</span>.</p>
+<p>Para responder la cuestión inicial estamos interesados en estudiar la distribución marginal del vector aleatorio <span class="math inline">\((Y_1, Y_2, Y_3 \ldots )\)</span>.</p>
 </div>
 <div id="implementacion" class="section level2">
 <h2>Implementación</h2>
@@ -382,12 +387,14 @@ programa_c&lt;-<span class="kw">stan_model</span>(<span class="dt">model_code=</
 N_new &lt;-<span class="st"> </span><span class="dv">144</span>
 jan_new &lt;-<span class="st"> </span>flow[<span class="dv">1</span>]
 alpha &lt;-<span class="st"> </span><span class="fl">0.5</span> -&gt;<span class="st"> </span>beta
-mu0 &lt;-<span class="st"> </span><span class="dv">3</span> -&gt;<span class="st"> </span>mu1 
-sigma0 &lt;-<span class="st"> </span><span class="dv">100</span> -&gt;<span class="st"> </span>sigma1
+mu0 &lt;-<span class="st"> </span><span class="dv">3</span> 
+sigma0 &lt;-<span class="st"> </span><span class="dv">100</span>
+mu1 &lt;-<span class="st"> </span><span class="dv">0</span>
+sigma1 &lt;-<span class="st"> </span><span class="dv">100</span>
 datos &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt">y=</span>flow, <span class="dt">N=</span>N, <span class="dt">N_new=</span>N_new, <span class="dt">jan_new=</span>jan_new, <span class="dt">mu0=</span>mu0, <span class="dt">sigma0=</span>sigma0, <span class="dt">mu1=</span>mu1, <span class="dt">sigma1=</span>sigma1, <span class="dt">beta=</span>beta, <span class="dt">alpha=</span>alpha)</code></pre></div>
 <p>Note que se ha considerado una <em>a priori</em> poco informativa para la media mensual del nivel del río y la pendiente entre meses consecutivos, pues se tiene una muestra de datos suficientemente grande para estimar estos parámetros. Para la varianza del nivel medio mensual también se ha considerado una <em>a-priori</em> poco informativa, equivalente a una observación con varianza <span class="math inline">\(1\)</span>.</p>
 <p>Simulamos del modelo de Stan.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">result &lt;-<span class="st"> </span><span class="kw">sampling</span>(programa_c, <span class="dt">data=</span>datos, <span class="dt">iter=</span><span class="dv">1500</span>, <span class="dt">chains=</span><span class="dv">1</span>)  </code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">result &lt;-<span class="st"> </span><span class="kw">sampling</span>(programa_c, <span class="dt">data=</span>datos, <span class="dt">iter=</span><span class="dv">1500</span>, <span class="dt">chains=</span><span class="dv">1</span>) </code></pre></div>
 <pre><code>## 
 ## SAMPLING FOR MODEL &#39;842b86bbb4ad5f287b88b8bb7fe0b935&#39; NOW (CHAIN 1).
 ## 
@@ -403,21 +410,21 @@ datos &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="dt
 ## Chain 1, Iteration: 1200 / 1500 [ 80%]  (Sampling)
 ## Chain 1, Iteration: 1350 / 1500 [ 90%]  (Sampling)
 ## Chain 1, Iteration: 1500 / 1500 [100%]  (Sampling)
-##  Elapsed Time: 51.537 seconds (Warm-up)
-##                38.6128 seconds (Sampling)
-##                90.1498 seconds (Total)</code></pre>
+##  Elapsed Time: 54.941 seconds (Warm-up)
+##                51.5356 seconds (Sampling)
+##                106.477 seconds (Total)</code></pre>
 <p>Extraemos los resultados del modelo.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">result.sim &lt;-<span class="st"> </span>rstan::<span class="kw">extract</span>(result) 
-<span class="co"># Número medio de desbordamientos en la simulación. </span>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">result.sim &lt;-<span class="st"> </span>rstan::<span class="kw">extract</span>(result)
+<span class="co"># Número medio de desbordamientos en la simulación.</span>
 <span class="kw">mean</span>(result.sim$y_new[,]&gt;<span class="kw">log</span>(<span class="dv">10000</span>)) </code></pre></div>
-<pre><code>## [1] 0.005648148</code></pre>
+<pre><code>## [1] 0.005277778</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Número medio de desbordamientos en la simulación para el mes de Junio. </span>
 <span class="kw">mean</span>(result.sim$y_new[,<span class="dv">12</span>*(<span class="dv">2</span>:<span class="dv">11</span>)+<span class="dv">6</span>]&gt;<span class="kw">log</span>(<span class="dv">10000</span>)) </code></pre></div>
-<pre><code>## [1] 0.0512</code></pre>
+<pre><code>## [1] 0.04666667</code></pre>
 <p>Podemos observar las trayectorias simuladas.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">river.flow &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">t</span>(result.sim$y_new[<span class="kw">sample</span>(<span class="dv">1</span>:<span class="dv">500</span>, <span class="dv">30</span>),<span class="dv">13</span>:<span class="dv">144</span>]), <span class="dt">ncol=</span> <span class="dv">12</span>, <span class="dt">byrow =</span> T)
 <span class="kw">as_refundObj</span>(river.flow) %&gt;%
-<span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> index, <span class="dt">y =</span> value, <span class="dt">group =</span> id)) +<span class="st"> </span><span class="kw">geom_path</span>(<span class="dt">alpha =</span> .<span class="dv">1</span>) </code></pre></div>
+<span class="st">  </span><span class="kw">ggplot</span>(<span class="kw">aes</span>(<span class="dt">x =</span> index, <span class="dt">y =</span> value, <span class="dt">group =</span> id)) +<span class="st"> </span><span class="kw">geom_path</span>(<span class="dt">alpha =</span> .<span class="dv">1</span>)</code></pre></div>
 <p><img src="trabajo_files/figure-html/unnamed-chunk-10-1.png" width="480" style="display: block; margin: auto;" /></p>
 <p>Podemos visualizar la función de densidad marginal del nivel medio del río en cierto mes.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">river.flow &lt;-<span class="st"> </span><span class="kw">matrix</span>(<span class="kw">t</span>(result.sim$y_new[,<span class="dv">13</span>:<span class="dv">144</span>]), <span class="dt">ncol=</span> <span class="dv">12</span>, <span class="dt">byrow =</span> T)
@@ -487,7 +494,7 @@ plot.datos&lt;-<span class="kw">data.frame</span>(<span class="dt">Month=</span>
 </div>
 <div id="resultados" class="section level2">
 <h2>Resultados</h2>
-<p>Respondiendo la motivación inicial, la probabildad estimada de que el río desborde superando los 10000 <span class="math inline">\(m^3/s\)</span> en un mes es de <span class="math inline">\(0.0056\)</span>. No obstante, usando el enfoque considerado se puede ser más específico en la respuesta. Por ejemplo, la probabilidad de que el río desborde en el mes de Junio es de <span class="math inline">\(0.05\)</span>.</p>
+<p>Respondiendo la motivación inicial, la probabildad estimada de que el río desborde superando los 10000 <span class="math inline">\(m^3/s\)</span> en un mes es cercana a <span class="math inline">\(5\cdot 10^{-3}\)</span>. No obstante, usando el enfoque considerado se puede ser más específico en la respuesta. Por ejemplo, la probabilidad de que el río desborde en el mes de Junio es de aproximadamente <span class="math inline">\(5 \cdot 10^{-2}\)</span>.</p>
 <hr />
 <div id="refs" class="references">
 <div id="ref-hoff2009first">
